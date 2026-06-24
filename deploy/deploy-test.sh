@@ -57,7 +57,7 @@ if [ -d /root/projects/traefik/dynamic ]; then
 http:
   routers:
     $APP_NAME:
-      rule: "Host(\`$DOMAIN\`)"
+      rule: "Host(\`$DOMAIN\`) || Host(\`www.$DOMAIN\`)"
       entryPoints:
         - websecure
       service: $APP_NAME

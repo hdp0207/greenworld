@@ -298,7 +298,7 @@ function App() {
   return (
     <>
       <header className="site-header">
-        <a className="brand" href="#" onClick={(e) => (e.preventDefault(), go("home"))}>
+        <a className="brand" href="#home" onClick={(e) => (e.preventDefault(), go("home"))}>
           <LogoMark />
           <span>Greenworld</span>
           <small>株式会社</small>
@@ -593,7 +593,7 @@ function Footer({ t, page, go, lang, setLang }) {
   return (
     <footer>
       <div className="footer-inner">
-        <a className="brand footer-brand" href="#" onClick={(e) => (e.preventDefault(), go("home"))}>
+        <a className="brand footer-brand" href="#home" onClick={(e) => (e.preventDefault(), go("home"))}>
           <LogoMark />
           <span>Greenworld</span>
           <small>株式会社</small>

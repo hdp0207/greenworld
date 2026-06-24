@@ -1,0 +1,35 @@
+name: Deploy test website
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: greenworld-test-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: v0.01
+      APP_PORT: "18081"
+      DOMAIN: greenworld.9881.net
+      TEST_SERVER_HOST: 8.213.129.168
+      TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.TEST_SERVER_SSH_KEY }}" > ~/.ssh/greenworld_test_key
+          chmod 600 ~/.ssh/greenworld_test_key
+          ssh-keyscan -H "$TEST_SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy on test server
+        run: |
+          SERVER_USER="${TEST_SERVER_USER:-root}"
+          ssh -i ~/.ssh/greenworld_test_key "$SERVER_USER@$TEST_SERVER_HOST" \
+            "APP_VERSION='$APP_VERSION' APP_PORT='$APP_PORT' DOMAIN='$DOMAIN' bash -s" < deploy/deploy-test.sh

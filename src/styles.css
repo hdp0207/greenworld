@@ -708,6 +708,12 @@ footer p {
   font-size: 12px;
 }
 
+footer .version {
+  display: inline-block;
+  margin-left: 16px;
+  opacity: 0.82;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(24px);

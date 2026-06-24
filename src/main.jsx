@@ -21,6 +21,7 @@ import "./styles.css";
 
 const FORM_EMBED_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSeX3jSIfxiYY-MOmoVE8hwLxi6AKkvq5bSYYmpRJ6YT1lgHdw/viewform?embedded=true";
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || "v0.01";
 
 const copy = {
   ja: {
@@ -612,7 +613,10 @@ function Footer({ t, page, go, lang, setLang }) {
           ))}
         </div>
       </div>
-      <p>{t.footer}</p>
+      <p>
+        {t.footer}
+        <span className="version">Version {APP_VERSION}</span>
+      </p>
     </footer>
   );
 }

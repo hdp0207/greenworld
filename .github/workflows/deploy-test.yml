@@ -20,6 +20,9 @@ jobs:
       TEST_SERVER_HOST: 8.213.129.168
       TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh

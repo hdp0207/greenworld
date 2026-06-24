@@ -697,8 +697,16 @@ footer button {
   color: white;
 }
 
+footer .logo-mark {
+  color: white;
+}
+
 footer .logo-ring {
-  opacity: 0.42;
+  opacity: 0.72;
+}
+
+footer .logo-route {
+  opacity: 0.9;
 }
 
 footer p {

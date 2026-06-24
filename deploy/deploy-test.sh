@@ -99,5 +99,14 @@ else
   echo "No Traefik dynamic directory or nginx found. Container is available on 127.0.0.1:$APP_PORT; configure reverse proxy for $DOMAIN manually." >&2
 fi
 
-curl -fsS "http://127.0.0.1:$APP_PORT/" >/dev/null
+for attempt in $(seq 1 20); do
+  if curl -fsS "http://127.0.0.1:$APP_PORT/" >/dev/null; then
+    break
+  fi
+  if [ "$attempt" = "20" ]; then
+    echo "health check failed after $attempt attempts" >&2
+    exit 1
+  fi
+  sleep 2
+done
 echo "$APP_NAME $APP_VERSION deployed for $DOMAIN"

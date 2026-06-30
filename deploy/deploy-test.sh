@@ -37,7 +37,7 @@ $SUDO mkdir -p "$APP_DIR"
 if [ -d "$APP_DIR/.git" ]; then
   cd "$APP_DIR"
   $SUDO git fetch origin "$BRANCH"
-  $SUDO git reset --hard "origin/$BRANCH"
+  $SUDO git reset --hard FETCH_HEAD
 else
   $SUDO rm -rf "$APP_DIR"
   $SUDO git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"

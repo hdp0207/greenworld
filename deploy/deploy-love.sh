@@ -46,6 +46,10 @@ else
   cd "$APP_DIR"
 fi
 
+if [ -n "$SUDO" ]; then
+  $SUDO chown -R "$(id -u):$(id -g)" "$APP_DIR"
+fi
+
 cat > .env.love <<EOF
 APP_VERSION=$APP_VERSION
 APP_PORT=$APP_PORT

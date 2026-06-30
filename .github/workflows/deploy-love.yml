@@ -18,7 +18,7 @@ jobs:
       APP_PORT: "18083"
       DOMAIN: www.greenworld.love
       EXTRA_DOMAIN: greenworld.love
-      SERVER_HOST: 43.164.133.234
+      SERVER_HOST: 43.203.247.128
       SERVER_USER: ${{ secrets.GREENWORLD_LOVE_SERVER_USER }}
     steps:
       - name: Checkout repository
@@ -34,6 +34,6 @@ jobs:
 
       - name: Deploy on server
         run: |
-          LOGIN_USER="${SERVER_USER:-root}"
+          LOGIN_USER="${SERVER_USER:-ubuntu}"
           ssh -i ~/.ssh/greenworld_love_key "$LOGIN_USER@$SERVER_HOST" \
             "APP_VERSION='$APP_VERSION' APP_PORT='$APP_PORT' DOMAIN='$DOMAIN' EXTRA_DOMAIN='$EXTRA_DOMAIN' bash -s" < deploy/deploy-love.sh

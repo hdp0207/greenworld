@@ -7,6 +7,7 @@ APP_PORT="${APP_PORT:-18083}"
 APP_VERSION="${APP_VERSION:-v0.01}"
 DOMAIN="${DOMAIN:-www.greenworld.love}"
 EXTRA_DOMAIN="${EXTRA_DOMAIN:-greenworld.love}"
+NPM_DATA_DIR="${NPM_DATA_DIR:-/home/ubuntu/docker/npm/data}"
 REPO_URL="${REPO_URL:-https://github.com/hdp0207/greenworld.git}"
 BRANCH="${BRANCH:-main}"
 
@@ -52,8 +53,31 @@ EOF
 
 $SUDO $COMPOSE --env-file .env.love -f docker-compose.love.yml up -d --build
 
-TMP_CONF="/tmp/${APP_NAME}.nginx.conf"
-cat > "$TMP_CONF" <<EOF
+if docker ps --format '{{.Names}}' | grep -qx npm; then
+  $SUDO mkdir -p "$NPM_DATA_DIR/nginx/proxy_host"
+  TMP_CONF="/tmp/${APP_NAME}.nginx.conf"
+  cat > "$TMP_CONF" <<EOF
+server {
+    listen 80;
+    server_name $DOMAIN $EXTRA_DOMAIN;
+
+    location / {
+        proxy_pass http://greenworld-love-web:80;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+
+  $SUDO mv "$TMP_CONF" "$NPM_DATA_DIR/nginx/proxy_host/${APP_NAME}.conf"
+  $SUDO docker exec npm nginx -t
+  $SUDO docker exec npm nginx -s reload
+else
+  TMP_CONF="/tmp/${APP_NAME}.nginx.conf"
+  cat > "$TMP_CONF" <<EOF
 server {
     listen 80;
     server_name $DOMAIN $EXTRA_DOMAIN;
@@ -61,20 +85,21 @@ server {
     location / {
         proxy_pass http://127.0.0.1:$APP_PORT;
         proxy_http_version 1.1;
-        proxy_set_header Host \\$host;
-        proxy_set_header X-Real-IP \\$remote_addr;
-        proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \\$scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOF
 
-$SUDO mv "$TMP_CONF" "/etc/nginx/conf.d/${APP_NAME}.conf"
-$SUDO nginx -t
-if command -v systemctl >/dev/null 2>&1; then
-  $SUDO systemctl reload nginx
-else
-  $SUDO nginx -s reload
+  $SUDO mv "$TMP_CONF" "/etc/nginx/conf.d/${APP_NAME}.conf"
+  $SUDO nginx -t
+  if command -v systemctl >/dev/null 2>&1; then
+    $SUDO systemctl reload nginx
+  else
+    $SUDO nginx -s reload
+  fi
 fi
 
 for attempt in $(seq 1 20); do

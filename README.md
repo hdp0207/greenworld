@@ -52,7 +52,7 @@ Deployment behavior:
 Production-style domain:
 
 ```text
-www.greenworld.love -> 43.164.133.234
+www.greenworld.love -> 43.203.247.128
 ```
 
 The GitHub Actions workflow `.github/workflows/deploy-love.yml` deploys every push to `main`.
@@ -60,8 +60,8 @@ The GitHub Actions workflow `.github/workflows/deploy-love.yml` deploys every pu
 Required GitHub repository secrets:
 
 ```text
-GREENWORLD_LOVE_SSH_KEY      # private key that can SSH into 43.164.133.234
-GREENWORLD_LOVE_SERVER_USER  # optional, defaults to root
+GREENWORLD_LOVE_SSH_KEY      # private key that can SSH into 43.203.247.128
+GREENWORLD_LOVE_SERVER_USER  # optional, defaults to ubuntu
 ```
 
 Deployment behavior:
@@ -69,4 +69,5 @@ Deployment behavior:
 - pulls `main` into `/opt/greenworld`
 - builds and runs Docker Compose from `docker-compose.love.yml`
 - exposes the app container on `127.0.0.1:18083`
-- writes an Nginx virtual host for `www.greenworld.love` and `greenworld.love`
+- joins the existing external Docker network `web`
+- writes a proxy host into the existing Nginx Proxy Manager container for `www.greenworld.love` and `greenworld.love`

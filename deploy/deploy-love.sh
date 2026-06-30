@@ -60,10 +60,33 @@ $SUDO $COMPOSE --env-file .env.love -f docker-compose.love.yml up -d --build
 if docker ps --format '{{.Names}}' | grep -qx npm; then
   $SUDO mkdir -p "$NPM_DATA_DIR/nginx/proxy_host"
   TMP_CONF="/tmp/${APP_NAME}.nginx.conf"
-  cat > "$TMP_CONF" <<EOF
+  CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
+  if $SUDO docker exec npm test -f "$CERT_DIR/fullchain.pem"; then
+    cat > "$TMP_CONF" <<EOF
 server {
     listen 80;
     server_name $DOMAIN $EXTRA_DOMAIN;
+
+    include conf.d/include/letsencrypt-acme-challenge.conf;
+
+    location / {
+        proxy_pass http://greenworld-love-web:80;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name $DOMAIN $EXTRA_DOMAIN;
+
+    ssl_certificate $CERT_DIR/fullchain.pem;
+    ssl_certificate_key $CERT_DIR/privkey.pem;
+    include conf.d/include/ssl-ciphers.conf;
 
     location / {
         proxy_pass http://greenworld-love-web:80;
@@ -75,6 +98,25 @@ server {
     }
 }
 EOF
+  else
+  cat > "$TMP_CONF" <<EOF
+server {
+    listen 80;
+    server_name $DOMAIN $EXTRA_DOMAIN;
+
+    include conf.d/include/letsencrypt-acme-challenge.conf;
+
+    location / {
+        proxy_pass http://greenworld-love-web:80;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+  fi
 
   $SUDO mv "$TMP_CONF" "$NPM_DATA_DIR/nginx/proxy_host/${APP_NAME}.conf"
   $SUDO docker exec npm nginx -t

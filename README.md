@@ -46,3 +46,27 @@ Deployment behavior:
 - joins the existing external Docker network `web`
 - writes a Traefik dynamic route when `/root/projects/traefik/dynamic` exists
 - falls back to writing an Nginx virtual host if host Nginx is available
+
+## greenworld.love Deployment
+
+Production-style domain:
+
+```text
+www.greenworld.love -> 43.164.133.234
+```
+
+The GitHub Actions workflow `.github/workflows/deploy-love.yml` deploys every push to `main`.
+
+Required GitHub repository secrets:
+
+```text
+GREENWORLD_LOVE_SSH_KEY      # private key that can SSH into 43.164.133.234
+GREENWORLD_LOVE_SERVER_USER  # optional, defaults to root
+```
+
+Deployment behavior:
+
+- pulls `main` into `/opt/greenworld`
+- builds and runs Docker Compose from `docker-compose.love.yml`
+- exposes the app container on `127.0.0.1:18083`
+- writes an Nginx virtual host for `www.greenworld.love` and `greenworld.love`

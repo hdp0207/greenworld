@@ -1,0 +1,39 @@
+name: Deploy greenworld.love
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: greenworld-love-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: v0.01
+      APP_PORT: "18083"
+      DOMAIN: www.greenworld.love
+      EXTRA_DOMAIN: greenworld.love
+      SERVER_HOST: 43.164.133.234
+      SERVER_USER: ${{ secrets.GREENWORLD_LOVE_SERVER_USER }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.GREENWORLD_LOVE_SSH_KEY }}" > ~/.ssh/greenworld_love_key
+          chmod 600 ~/.ssh/greenworld_love_key
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy on server
+        run: |
+          LOGIN_USER="${SERVER_USER:-root}"
+          ssh -i ~/.ssh/greenworld_love_key "$LOGIN_USER@$SERVER_HOST" \
+            "APP_VERSION='$APP_VERSION' APP_PORT='$APP_PORT' DOMAIN='$DOMAIN' EXTRA_DOMAIN='$EXTRA_DOMAIN' bash -s" < deploy/deploy-love.sh

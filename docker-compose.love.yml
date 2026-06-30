@@ -1,0 +1,17 @@
+services:
+  greenworld-love-web:
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-v0.01}
+    image: greenworld-love-web:${APP_VERSION:-v0.01}
+    container_name: greenworld-love-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${APP_PORT:-18083}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
